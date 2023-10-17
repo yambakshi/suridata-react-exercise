@@ -10,7 +10,6 @@ import debounce from 'lodash/debounce';
 import React from 'react';
 import axios from 'axios';
 
-
 const data: BlogPost[] = [
   { id: '3623f638-bdb2-498a-a756-207efc71ba25', username: 'Edouard Falks', title: 'Marketing', body: 'Total tangible process improvement', date: '1/9/2023' },
   { id: 'b98db394-25a5-4334-965c-f42850d3760c', username: 'Clemens Guitte', title: 'Legal', body: 'Business-focused scalable initiative', date: '10/5/2022' },
