@@ -1,4 +1,4 @@
-export const USASvg = ({ width = 75, height = 50, ...props }: { width?: number, height?: number }) => {
+export const USASvg = ({ width = 37.5, height = 25, ...props }: { width?: number, height?: number }) => {
 	return (
 		<svg {...props} width={width} height={height} viewBox="0 0 6000 3900" xmlns="http://www.w3.org/2000/svg">
 			<path fill="#b22234" d="M0 0h7410v3900H0z" />

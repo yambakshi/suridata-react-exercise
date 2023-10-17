@@ -1,3 +1,4 @@
+import { FormControl, InputLabel, MenuItem, Select, SelectChangeEvent, TextField } from '@mui/material';
 import { DataGrid, GridInitialState, useGridApiRef } from '@mui/x-data-grid';
 import { BlogPostVote } from '../../components/Vote/BlogPostVote';
 import { StyledBlogPostsFeed } from './blogPostsFeed.style';
@@ -5,7 +6,6 @@ import { FranceSvg, SpainSvg, USASvg } from '../../assets';
 import { formatBlogPosts } from './blogPostsFeed.utils';
 import { BlogPost, BlogPostRow } from '../../types';
 import { BlogLanguage } from '../../enums';
-import { TextField } from '@mui/material';
 import debounce from 'lodash/debounce';
 import React from 'react';
 import axios from 'axios';
@@ -79,6 +79,13 @@ export const BlogPostsFeed = () => {
   const [loading, setLoading] = React.useState<boolean>(false);
   const [quickFilter, setQuickFilter] = React.useState('');
   const apiRef = useGridApiRef();
+
+  const [age, setAge] = React.useState('');
+
+  const handleChange = (event: SelectChangeEvent) => {
+    setAge(event.target.value as string);
+  };
+
 
   // React.useEffect(() => {
   //   axios.get('https://my.api.mockaroo.com/posts', {
@@ -237,23 +244,35 @@ export const BlogPostsFeed = () => {
           />
         </div>
         <div className='translations-container'>
-          {languagesOptions.map(({ language, icon }) =>
-            <div
-              key={language}
-              style={{
-                border: selectedLanguage === language ? '2px solid #fff' : 'none',
-                ...loadingTranslation ? {
-                  pointerEvents: 'none',
-                  opacity: '0.7',
-                } : {
-                  pointerEvents: 'auto',
-                  opacity: '1',
-                }
-              }}
-              onClick={() => handleLanguageClick(language)}>
-              {icon}
-            </div>
-          )}
+          <FormControl fullWidth>
+            <InputLabel id="language-select-label">Language</InputLabel>
+            <Select
+              labelId="language-select-label"
+              id="language-select"
+              value={selectedLanguage}
+              label="Language"
+              onChange={handleChange}
+            >
+              {languagesOptions.map(({ language, icon }) =>
+                <MenuItem
+                  key={language}
+                  value={language}
+                  style={{
+                    border: selectedLanguage === language ? '2px solid #fff' : 'none',
+                    ...loadingTranslation ? {
+                      pointerEvents: 'none',
+                      opacity: '0.7',
+                    } : {
+                      pointerEvents: 'auto',
+                      opacity: '1',
+                    }
+                  }}
+                  onClick={() => handleLanguageClick(language)}>
+                  {icon}
+                </MenuItem>
+              )}
+            </Select>
+          </FormControl>
         </div>
       </div>
 

@@ -43,10 +43,24 @@ export const StyledBlogPostsFeed = styled.div`
             display: flex;
             align-items: center;
 
-            div {
-                display: flex;
-                cursor: pointer;
-                margin-left: 10px;
+            .MuiFormControl-root {
+                margin-left: 1rem;
+
+                .MuiFormLabel-root {
+                    color: #fff;
+                }
+
+                .MuiInputBase-root  > div {
+                    padding-bottom: 9px;
+                }
+
+                .MuiSvgIcon-root {
+                    color: #fff;
+                }
+
+                .MuiOutlinedInput-notchedOutline {
+                    border-color: #fff;
+                }
             }
         }
     }
