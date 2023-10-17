@@ -6,9 +6,4 @@ export const StyledLoading = styled.div`
     justify-content: center;
     width: 100%;
     height: 100vh;
-
-    div {
-        font-size: 48px;
-        color: #fff;
-    }
 `

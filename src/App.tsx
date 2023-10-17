@@ -1,14 +1,17 @@
-import { BlogPostsProvider } from './providers/BlogPostsProvider';
+import { Route, BrowserRouter as Router, Routes } from "react-router-dom";
 import { BlogPostsFeed } from './pages/BlogPostsFeed';
+import React from "react";
 import './App.css';
 
 function App() {
   return (
-    <div className="app">
-      <BlogPostsProvider>
-        <BlogPostsFeed />
-      </BlogPostsProvider>
-    </div>
+    <React.Fragment>
+      <Router>
+        <Routes>
+          <Route path='' element={<BlogPostsFeed />} />
+        </Routes>
+      </Router>
+    </React.Fragment>
   );
 }
 

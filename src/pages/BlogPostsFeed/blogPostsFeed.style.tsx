@@ -8,7 +8,7 @@ export const StyledBlogPostsFeed = styled.div`
     align-items: center;
 
     h1 {
-        color: #fff;
+        color: darkslategray;
     }
 
     .data-grid-toolbar {
@@ -26,15 +26,15 @@ export const StyledBlogPostsFeed = styled.div`
                 .MuiInputBase-root,
                 .MuiOutlinedInput-root,
                 .MuiInputBase-colorPrimary {
-                    color: #fff;
+                    color: darkslategray;
 
                     .MuiOutlinedInput-notchedOutline {
-                        border-color: #fff;
+                        border-color: darkslategray;
                     }
                 }
 
                 .MuiFormLabel-root {
-                    color: #fff;
+                    color: darkslategray;
                 }
             }
         }
@@ -47,7 +47,7 @@ export const StyledBlogPostsFeed = styled.div`
                 margin-left: 1rem;
 
                 .MuiFormLabel-root {
-                    color: #fff;
+                    color: darkslategray;
                 }
 
                 .MuiInputBase-root  > div {
@@ -55,11 +55,11 @@ export const StyledBlogPostsFeed = styled.div`
                 }
 
                 .MuiSvgIcon-root {
-                    color: #fff;
+                    color: darkslategray;
                 }
 
                 .MuiOutlinedInput-notchedOutline {
-                    border-color: #fff;
+                    border-color: darkslategray;
                 }
             }
         }
@@ -67,16 +67,14 @@ export const StyledBlogPostsFeed = styled.div`
 
     .data-grid-container {
         width: 100%;
+        height: 631px;
+
+        .MuiDataGrid-root {
+        }
     
         .MuiDataGrid-root,
         .MuiTablePagination-root {
-            color: #fff;
-
-            .MuiToolbar-root > .MuiTablePagination-actions{
-                .Mui-disabled {
-                    color: #757575;
-                }
-            }
+            color: darkslategray;
         }
     }
 `

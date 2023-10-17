@@ -1,9 +1,10 @@
+import { CircularProgress } from "@mui/material"
 import { StyledLoading } from "./loading.style"
 
 export const Loading = () => {
     return (
         <StyledLoading>
-            <div>Loading...</div>
+            <CircularProgress />
         </StyledLoading>
     )
 }

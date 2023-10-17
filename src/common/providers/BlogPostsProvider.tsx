@@ -1,7 +1,7 @@
 import { BlogPostsContext } from '../context/BlogPostsContext';
 import { BlogPost, BlogPostRow } from '../types';
 import React, { ReactElement } from 'react';
-import { BlogLanguage } from '../enums';
+import { Language } from '../enums';
 import axios from 'axios';
 
 
@@ -9,14 +9,14 @@ const formatData = (data: BlogPost[]): BlogPostRow[] => {
     return data.map(({ id, title, body }) => ({
         id,
         title: {
-            [BlogLanguage.English]: title,
-            [BlogLanguage.Spanish]: '',
-            [BlogLanguage.French]: ''
+            [Language.English]: title,
+            [Language.Spanish]: '',
+            [Language.French]: ''
         },
         body: {
-            [BlogLanguage.English]: body,
-            [BlogLanguage.Spanish]: '',
-            [BlogLanguage.French]: ''
+            [Language.English]: body,
+            [Language.Spanish]: '',
+            [Language.French]: ''
         },
         thumbsUp: false,
         thumbsDown: false

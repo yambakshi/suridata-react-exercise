@@ -1,12 +1,12 @@
 import { StyledBlogPostVote } from './blogPostVote.style';
-import { BlogPostRow } from '../../types/BlogPostRow';
+import { BlogPostRow } from '../../common/types/BlogPostRow';
 import { LikeSvg } from '../../assets';
 import React from 'react';
 
 const voteColors = {
     thumbsUp: '#00aaff',
     thumbsDown: '#f00',
-    idle: '#fff'
+    idle: '#2f4f4f'
 }
 
 export const BlogPostVote = ({ row, onVote }: { row: BlogPostRow, onVote: Function }) => {
