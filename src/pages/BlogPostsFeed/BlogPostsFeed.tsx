@@ -80,10 +80,12 @@ export const BlogPostsFeed = () => {
   const [quickFilter, setQuickFilter] = React.useState('');
   const apiRef = useGridApiRef();
 
-  const [age, setAge] = React.useState('');
-
   const handleChange = (event: SelectChangeEvent) => {
-    setAge(event.target.value as string);
+    if (event.target.value === selectedLanguage) {
+      return;
+    }
+
+    translatePosts(event.target.value as BlogLanguage);
   };
 
 
@@ -144,14 +146,6 @@ export const BlogPostsFeed = () => {
         />
     }
   ];
-
-  const handleLanguageClick = (language: BlogLanguage) => {
-    if (language === selectedLanguage) {
-      return;
-    }
-
-    translatePosts(language);
-  }
 
   const translatePosts = (language: BlogLanguage) => {
     const { page: currentPage, pageSize } = apiRef.current.state.pagination.paginationModel;
@@ -267,7 +261,7 @@ export const BlogPostsFeed = () => {
                       opacity: '1',
                     }
                   }}
-                  onClick={() => handleLanguageClick(language)}>
+                >
                   {icon}
                 </MenuItem>
               )}
