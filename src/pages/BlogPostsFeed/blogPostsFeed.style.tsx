@@ -11,26 +11,42 @@ export const StyledBlogPostsFeed = styled.div`
         color: #fff;
     }
 
-    // Quick filter
-    .quick-filter-container {
+    .data-grid-toolbar {
         width: 100%;
         margin-bottom: 1rem;
+        display: flex;
 
-        .MuiFormControl-root {
-            width: 100%;
+        // Quick filter
+        .quick-filter-container {
+            flex: 1;
 
-            .MuiInputBase-root,
-            .MuiOutlinedInput-root,
-            .MuiInputBase-colorPrimary {
-                color: #fff;
+            .MuiFormControl-root {
+                width: 100%;
 
-                .MuiOutlinedInput-notchedOutline {
-                    border-color: #fff;
+                .MuiInputBase-root,
+                .MuiOutlinedInput-root,
+                .MuiInputBase-colorPrimary {
+                    color: #fff;
+
+                    .MuiOutlinedInput-notchedOutline {
+                        border-color: #fff;
+                    }
+                }
+
+                .MuiFormLabel-root {
+                    color: #fff;
                 }
             }
+        }
 
-            .MuiFormLabel-root {
-                color: #fff;
+        .translations-container {
+            display: flex;
+            align-items: center;
+
+            div {
+                display: flex;
+                cursor: pointer;
+                margin-left: 10px;
             }
         }
     }
