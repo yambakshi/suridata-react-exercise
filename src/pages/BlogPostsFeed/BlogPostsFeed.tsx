@@ -1,11 +1,15 @@
-import { DataGrid, GridInitialState } from '@mui/x-data-grid';
+import { DataGrid, GridInitialState, useGridApiRef } from '@mui/x-data-grid';
+import { BlogPostVote } from '../../components/Vote/BlogPostVote';
 import { StyledBlogPostsFeed } from './blogPostsFeed.style';
+import { FranceSvg, SpainSvg, USASvg } from '../../assets';
+import { formatBlogPosts } from './blogPostsFeed.utils';
+import { BlogPost, BlogPostRow } from '../../types';
+import { BlogLanguage } from '../../enums';
 import { TextField } from '@mui/material';
 import debounce from 'lodash/debounce';
 import React from 'react';
 import axios from 'axios';
-import { BlogPostVote } from '../../components/Vote/BlogPostVote';
-import { BlogPostRow } from '../../types/BlogPostRow';
+
 
 const data: BlogPost[] = [
   { id: '3623f638-bdb2-498a-a756-207efc71ba25', username: 'Edouard Falks', title: 'Marketing', body: 'Total tangible process improvement', date: '1/9/2023' },
@@ -51,14 +55,6 @@ const data: BlogPost[] = [
   { id: '68b7d977-2686-41be-998a-058ec8decf98', username: 'Tobie Gommey', title: 'Research and Development', body: 'Fundamental value-added firmware', date: '9/26/2022' }
 ]
 
-type BlogPost = {
-  id: string;
-  username: string;
-  title: string;
-  body: string;
-  date: string;
-}
-
 const initialState: GridInitialState = {
   pagination: {
     paginationModel: {
@@ -68,23 +64,44 @@ const initialState: GridInitialState = {
   }
 }
 
-const formatBlogPosts = (data: BlogPost[]): BlogPostRow[] => {
-  return data.map(({ id, title, body }) => ({ id, title, body, thumbsUp: false, thumbsDown: false }));
-}
+const languagesOptions = [
+  { language: BlogLanguage.English, icon: <USASvg /> },
+  { language: BlogLanguage.Spanish, icon: <SpainSvg /> },
+  { language: BlogLanguage.French, icon: <FranceSvg /> }
+]
 
 export const BlogPostsFeed = () => {
+  const [selectedLanguage, setSelectedLanguage] = React.useState<BlogLanguage>(BlogLanguage.English);
+  const [loadingTranslation, setLoadingTranslation] = React.useState<boolean>(false);
+  // const [filteredRows, setFilteredRows] = React.useState<BlogPostRow[]>([]);
+  // const [blogPosts, setBlogPosts] = React.useState<BlogPostRow[]>([]);
   const [blogPosts, setBlogPosts] = React.useState<BlogPostRow[]>(formatBlogPosts(data));
   const [filteredRows, setFilteredRows] = React.useState<BlogPostRow[]>(formatBlogPosts(data));
-  // const [blogPosts, setBlogPosts] = React.useState<BlogPostRow[]>([]);
-  // const [filteredRows, setFilteredRows] = React.useState<BlogPostRow[]>([]);
   const [loading, setLoading] = React.useState<boolean>(false);
   const [quickFilter, setQuickFilter] = React.useState('');
+  const apiRef = useGridApiRef();
+
+  // React.useEffect(() => {
+  //   axios.get('https://my.api.mockaroo.com/posts', {
+  //     headers: {
+  //       'X-API-Key': '04d55c10',
+  //       "Content-Type": 'application/json'
+  //     }
+  //   }).then(({ data }) => {
+  //     const formattedData = formatBlogPosts(data);
+  //     setBlogPosts(formattedData);
+  //     setFilteredRows(formattedData);
+  //     setLoading(false);
+  //   }).catch(error => {
+  //     console.error('Error fetching data:', error);
+  //   });
+  // }, [])
 
   const debouncedFilter = debounce((value) => {
     const filteredRows = blogPosts.filter((row) => {
       return (
-        row.title.toLowerCase().includes(value.toLowerCase()) ||
-        row.body.toLowerCase().includes(value.toLowerCase())
+        row.title[selectedLanguage].toLowerCase().includes(value.toLowerCase()) ||
+        row.body[selectedLanguage].toLowerCase().includes(value.toLowerCase())
       );
     });
 
@@ -96,25 +113,15 @@ export const BlogPostsFeed = () => {
     debouncedFilter(event.target.value);
   };
 
-  // React.useEffect(() => {
-  //   axios.get('https://my.api.mockaroo.com/posts', {
-  //     headers: {
-  //       'X-API-Key': '04d55c10',
-  //       "Content-Type": 'application/json'
-  //     }
-  //   }).then(({ data }) => {
-  //     setBlogPosts(formatBlogPosts(data));
-  //     setFilteredRows(formatBlogPosts(data));
-  //     setLoading(false);
-  //     console.log(data);
-  //   }).catch(error => {
-  //     console.error('Error fetching data:', error);
-  //   });
-  // }, [])
-
   const columns = [
-    { field: 'title', headerName: 'Title', flex: 1, sortable: false },
-    { field: 'body', headerName: 'Body', flex: 1, sortable: false },
+    {
+      field: 'title', headerName: 'Title', flex: 12, sortable: false,
+      renderCell: ({ row }: { row: BlogPostRow }) => row.title[selectedLanguage]
+    },
+    {
+      field: 'body', headerName: 'Body', flex: 12, sortable: false,
+      renderCell: ({ row }: { row: BlogPostRow }) => row.body[selectedLanguage]
+    },
     {
       field: 'vote', headerName: '', flex: 1, sortable: false,
       renderCell: ({ row }: { row: BlogPostRow }) =>
@@ -132,16 +139,125 @@ export const BlogPostsFeed = () => {
     }
   ];
 
+  const handleLanguageClick = (language: BlogLanguage) => {
+    if (language === selectedLanguage) {
+      return;
+    }
+
+    translatePosts(language);
+  }
+
+  const translatePosts = (language: BlogLanguage) => {
+    const { page: currentPage, pageSize } = apiRef.current.state.pagination.paginationModel;
+    const startIndex = currentPage * pageSize;
+    const endIndex = startIndex + pageSize;
+    const displayedRows = filteredRows.slice(startIndex, endIndex);
+
+    // If page was already translated
+    if (displayedRows[0].title[language]) {
+      setSelectedLanguage(language);
+      return;
+    }
+
+    const displayedRowsTexts = displayedRows.reduce((acc: { text: string }[], { title, body }) => {
+      return [
+        ...acc,
+        { 'text': title[BlogLanguage.English] },
+        { 'text': body[BlogLanguage.English] }
+      ]
+    }, []);
+
+    // Fetch translations
+    const { v4: uuidv4 } = require('uuid');
+    const key = '083f98b1ea1e49bcbadc13de4616d9a8'; // Security Vulnrability! should be in server
+    const location = 'centralus';
+    const endpoint = `https://api.cognitive.microsofttranslator.com/translate?api-version=3.0&from=${BlogLanguage.English}&to=${language}`;
+
+    setLoadingTranslation(true);
+    axios.post(
+      endpoint,
+      displayedRowsTexts,
+      {
+        headers: {
+          'Ocp-Apim-Subscription-Key': key,
+          'Ocp-Apim-Subscription-Region': location,
+          'Content-type': 'application/json',
+          'X-ClientTraceId': uuidv4().toString()
+        }
+      })
+      .then(res => {
+
+        // Update displayed rows with translations
+        const translatedRows: BlogPostRow[] = [];
+        for (let i = 0; i < displayedRows.length; i++) {
+          const translatedRow = {
+            ...filteredRows[startIndex + i],
+            title: {
+              ...filteredRows[startIndex + i].title,
+              [language]: res.data[i * 2].translations[0].text
+            },
+            body: {
+              ...filteredRows[startIndex + i].body,
+              [language]: res.data[(i * 2) + 1].translations[0].text
+            }
+          };
+
+          const blogPostIndex = blogPosts.findIndex(({ id }) => id === translatedRow.id);
+          blogPosts[blogPostIndex].title = translatedRow.title;
+          blogPosts[blogPostIndex].body = translatedRow.body;
+          translatedRows.push(translatedRow);
+        }
+
+        // Re-render
+        const updatedRows = [
+          ...filteredRows.slice(0, startIndex),
+          ...translatedRows,
+          ...filteredRows.slice(endIndex, filteredRows.length)
+        ];
+
+        setBlogPosts(blogPosts);
+        setFilteredRows(updatedRows);
+        setSelectedLanguage(language);
+        setLoadingTranslation(false);
+      })
+      .catch(error => {
+        console.error('Error translating text:', error);
+        setLoadingTranslation(false);
+      })
+  }
+
   return (
     <StyledBlogPostsFeed>
       <h1>Suridata Blog</h1>
-      <div className='quick-filter-container'>
-        <TextField
-          label="Quick Filter"
-          value={quickFilter}
-          onChange={handleQuickFilterChange}
-        />
+      <div className='data-grid-toolbar'>
+        <div className='quick-filter-container'>
+          <TextField
+            label="Quick Filter"
+            value={quickFilter}
+            onChange={handleQuickFilterChange}
+          />
+        </div>
+        <div className='translations-container'>
+          {languagesOptions.map(({ language, icon }) =>
+            <div
+              key={language}
+              style={{
+                border: selectedLanguage === language ? '2px solid #fff' : 'none',
+                ...loadingTranslation ? {
+                  pointerEvents: 'none',
+                  opacity: '0.7',
+                } : {
+                  pointerEvents: 'auto',
+                  opacity: '1',
+                }
+              }}
+              onClick={() => handleLanguageClick(language)}>
+              {icon}
+            </div>
+          )}
+        </div>
       </div>
+
       <div className='data-grid-container'>
         <DataGrid
           disableColumnFilter
@@ -149,8 +265,10 @@ export const BlogPostsFeed = () => {
           disableDensitySelector
           disableRowSelectionOnClick
           disableColumnMenu
+          onPaginationModelChange={() => translatePosts(selectedLanguage)}
           rows={filteredRows}
           columns={columns}
+          apiRef={apiRef}
           sortModel={[]}
           loading={loading}
           initialState={initialState}
