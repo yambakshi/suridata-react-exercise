@@ -167,6 +167,7 @@ export const BlogPostsFeed = () => {
           ...filteredRows.slice(endIndex, filteredRows.length)
         ];
 
+        // Update blog posts with translations or else filtering on translations won't work
         setBlogPostsRows(blogPostsRows);
         setFilteredRows(updatedRows);
         setSelectedLanguage(language);
