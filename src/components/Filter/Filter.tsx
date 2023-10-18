@@ -17,10 +17,7 @@ export const Filter = ({ onChange }: { onChange: (text: string) => void }) => {
         <TextField
             label="Quick Filter"
             value={text}
-            onChange={(event) => {
-                const value = event.target.value;
-                setText(value);
-            }}
+            onChange={event => setText(event.target.value)}
         />
     )
 }

@@ -1,11 +1,11 @@
 import { LanguageSelector } from '../../components/LanguageSelecter/LanguageSelector';
 import { DataGrid, GridInitialState, useGridApiRef } from '@mui/x-data-grid';
-import { BlogPostsContext } from '../../common/context/BlogPostsContext';
-import { LanguageContext } from '../../common/context/LanguageContext';
-import { BlogPostVote } from '../../components/Vote/BlogPostVote';
-import { useTranslate } from '../../common/hooks/useTranslate';
+import { BlogPostVote } from '../../components/BlogPostVote/BlogPostVote';
+import { useBlogPosts, useTranslate } from '../../common/hooks';
 import { StyledBlogPostsFeed } from './blogPostsFeed.style';
 import { Filter } from '../../components/Filter/Filter';
+import { formatBlogPosts } from './blogPostsFeed.utils';
+import { LanguageContext } from '../../common/context';
 import { SelectChangeEvent } from '@mui/material';
 import { BlogPostRow } from '../../common/types';
 import { Language } from '../../common/enums';
@@ -22,11 +22,40 @@ const initialState: GridInitialState = {
 }
 
 export const BlogPostsFeed = () => {
-  const { blogPostsRows, setBlogPostsRows, loading } = React.useContext(BlogPostsContext);
-  const { translatePage, loading: loadingTranslation } = useTranslate();
+  const [blogPostsRows, setBlogPostsRows] = React.useState<BlogPostRow[]>([]);
+  const [filteredRows, setFilteredRows] = React.useState<BlogPostRow[]>([]);
+  const [isLoading, setIsLoading] = React.useState<boolean>(false);
   const { language, setLanguage } = React.useContext(LanguageContext);
   const [quickFilter, setQuickFilter] = React.useState('');
+  const { translateBlogPostsRows } = useTranslate();
+  const { fetchBlogPosts } = useBlogPosts();
   const apiRef = useGridApiRef();
+
+  React.useEffect(() => {
+    setIsLoading(true);
+    fetchBlogPosts()
+      .then((res: any) => {
+        setIsLoading(false);
+        const blogPostsRows = formatBlogPosts(res.data);
+        setBlogPostsRows(blogPostsRows);
+        setFilteredRows(blogPostsRows);
+      })
+      .catch(error => {
+        console.error('Error fetching blog posts: ', error);
+        setIsLoading(false);
+      })
+  }, []);
+
+  React.useEffect(() => {
+    const filteredRows = JSON.parse(JSON.stringify(blogPostsRows)).filter((row: BlogPostRow) => {
+      return (
+        row.title[language].toLowerCase().includes(quickFilter.toLowerCase()) ||
+        row.body[language].toLowerCase().includes(quickFilter.toLowerCase())
+      );
+    });
+
+    setFilteredRows(filteredRows);
+  }, [quickFilter]);
 
   const columns = [
     {
@@ -40,17 +69,7 @@ export const BlogPostsFeed = () => {
     {
       field: 'vote', headerName: '', flex: 1, sortable: false,
       renderCell: ({ row }: { row: BlogPostRow }) =>
-        <BlogPostVote
-          row={row}
-          onVote={(updatedRow: BlogPostRow) => {
-            const updatedRows = blogPostsRows.map((row: BlogPostRow) => {
-              if (row.id !== updatedRow.id) return row;
-              return updatedRow;
-            });
-
-            setBlogPostsRows(updatedRows);
-          }}
-        />
+        <BlogPostVote row={row} />
     }
   ];
 
@@ -60,56 +79,30 @@ export const BlogPostsFeed = () => {
     const endIndex = startIndex + pageSize;
     const displayedRows = filteredRows.slice(startIndex, endIndex);
 
-    const translatedPage = await translatePage({ data: displayedRows, language: selectedLanguage });
-    if (!translatedPage) return;
+    setIsLoading(true);
+
+    const translatedRows = await translateBlogPostsRows(displayedRows, selectedLanguage);
+    if (!translatedRows) {
+      setIsLoading(false);
+      return;
+    }
 
     // Update displayed rows with translations
-    const translatedRows: BlogPostRow[] = [];
-    displayedRows.forEach((_, i) => {
-      const translatedRow = {
-        ...displayedRows[i],
-        title: {
-          ...displayedRows[i].title,
-          [selectedLanguage]: translatedPage?.data[i * 2].translations[0].text
-        },
-        body: {
-          ...displayedRows[i].body,
-          [selectedLanguage]: translatedPage?.data[(i * 2) + 1].translations[0].text
-        }
-      };
+    const { data } = translatedRows;
+    displayedRows.forEach((displayedRow: BlogPostRow, i: number) => {
 
-      const blogPostIndex = blogPostsRows.findIndex(({ id }) => id === translatedRow.id);
-      blogPostsRows[blogPostIndex].title = translatedRow.title;
-      blogPostsRows[blogPostIndex].body = translatedRow.body;
-      translatedRows.push(translatedRow);
+      displayedRow.title[selectedLanguage] = data[i * 2].translations[0].text;
+      displayedRow.body[selectedLanguage] = data[(i * 2) + 1].translations[0].text;
     })
-
-    const updatedRows = [
-      ...filteredRows.slice(0, startIndex),
-      ...translatedRows,
-      ...filteredRows.slice(endIndex, filteredRows.length)
-    ];
-
-    setBlogPostsRows(updatedRows);
-    setLanguage?.(selectedLanguage);
+    setIsLoading(false);
   }
-
-  const filteredRows = blogPostsRows.filter((row) => {
-    return (
-      row.title[language].toLowerCase().includes(quickFilter.toLowerCase()) ||
-      row.body[language].toLowerCase().includes(quickFilter.toLowerCase())
-    );
-  });
 
   return (
     <StyledBlogPostsFeed>
       <h1>Suridata Blog</h1>
       <div className='data-grid-toolbar'>
         <div className='quick-filter-container'>
-          <Filter onChange={(value) => {
-            apiRef.current.setPage(0);
-            setQuickFilter(value);
-          }} />
+          <Filter onChange={value => setQuickFilter(value)} />
         </div>
         <div className='translations-container'>
           <LanguageSelector onChange={(event: SelectChangeEvent) => {
@@ -133,7 +126,7 @@ export const BlogPostsFeed = () => {
           apiRef={apiRef}
           pageSizeOptions={[10]}
           sortModel={[]}
-          loading={loading || loadingTranslation}
+          loading={isLoading}
           initialState={initialState}
         />
       </div>

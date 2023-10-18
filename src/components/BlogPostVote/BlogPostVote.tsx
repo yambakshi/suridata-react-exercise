@@ -9,7 +9,7 @@ const voteColors = {
     idle: '#2f4f4f'
 }
 
-export const BlogPostVote = ({ row, onVote }: { row: BlogPostRow, onVote: Function }) => {
+export const BlogPostVote = ({ row }: { row: BlogPostRow }) => {
     const [vote, setVote] = React.useState<{ thumbsUp: boolean, thumbsDown: boolean }>({ thumbsUp: row.thumbsUp, thumbsDown: row.thumbsDown });
     return (
         <StyledBlogPostVote>
@@ -22,8 +22,6 @@ export const BlogPostVote = ({ row, onVote }: { row: BlogPostRow, onVote: Functi
                     thumbsUp: row.thumbsUp,
                     thumbsDown: row.thumbsDown
                 })
-
-                onVote(row);
             }}>
                 <LikeSvg color={vote.thumbsUp ? voteColors.thumbsUp : voteColors.idle} />
             </div>
@@ -36,8 +34,6 @@ export const BlogPostVote = ({ row, onVote }: { row: BlogPostRow, onVote: Functi
                     thumbsUp: row.thumbsUp,
                     thumbsDown: row.thumbsDown
                 })
-
-                onVote(row);
             }}>
                 <LikeSvg color={vote.thumbsDown ? voteColors.thumbsDown : voteColors.idle} />
             </div>

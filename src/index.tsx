@@ -1,4 +1,3 @@
-import { BlogPostsProvider } from './common/providers/BlogPostsProvider';
 import { LanguageProvider } from './common/providers/LanguageProvider';
 import ReactDOM from 'react-dom/client';
 import App from './App';
@@ -9,8 +8,6 @@ const root = ReactDOM.createRoot(
 );
 root.render(
   <LanguageProvider>
-    <BlogPostsProvider>
-      <App />
-    </BlogPostsProvider>
+    <App />
   </LanguageProvider>
 );
